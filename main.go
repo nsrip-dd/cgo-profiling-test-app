@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -89,18 +90,15 @@ func main() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		result, err := db.Query(query, name)
-		if err != nil {
+		result := db.QueryRow(query, name)
+		var color string
+		err := result.Scan(&color)
+		if errors.Is(err, sql.ErrNoRows) {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		} else if err != nil {
 			log.Printf("query failed: %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		var color string
-		for result.Next() {
-			result.Scan(&color)
-		}
-		if color == "" {
-			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		fmt.Fprintf(w, "%s's favorite color is %s\n", name, color)
