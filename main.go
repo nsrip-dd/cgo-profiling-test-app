@@ -11,7 +11,6 @@ import (
 	"syscall"
 
 	_ "github.com/mattn/go-sqlite3"
-	_ "github.com/nsrip-dd/cgotraceback"
 	"gopkg.in/DataDog/dd-trace-go.v1/profiler"
 )
 
