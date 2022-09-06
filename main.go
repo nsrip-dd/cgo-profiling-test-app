@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/nsrip-dd/cgotraceback"
@@ -103,5 +105,14 @@ func main() {
 		}
 		fmt.Fprintf(w, "%s's favorite color is %s\n", name, color)
 	})
-	http.ListenAndServe(addr, mux)
+
+	server := http.Server{
+		Addr:    addr,
+		Handler: mux,
+	}
+	go server.ListenAndServe()
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	<-ch
+	server.Close()
 }
