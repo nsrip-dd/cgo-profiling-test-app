@@ -76,6 +76,9 @@ func main() {
 		defer stmt.Close()
 		if _, err = stmt.Exec(name, color); err != nil {
 			log.Printf("stmt exec failed: %s", err)
+			if err := tx.Rollback(); err != nil {
+				log.Printf("rolling back transaction: %s", err)
+			}
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
